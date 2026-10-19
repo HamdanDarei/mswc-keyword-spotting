@@ -11,9 +11,9 @@ Bug fixes from v1 (77.6%):
   7. Speed perturbation + time shift applied during precompute (3 augmented copies)
 
 Usage:
-    python kwt2_v2.py --precompute
-    python kwt2_v2.py --train
-    python kwt2_v2.py --all
+    python kwt2_v2.py --data_path /path/to/mswc --precompute
+    python kwt2_v2.py --data_path /path/to/mswc --train
+    python kwt2_v2.py --data_path /path/to/mswc --all
 """
 
 import os
@@ -42,7 +42,19 @@ from torch.utils.data import DataLoader, TensorDataset
 # =====================================================
 # PATHS
 # =====================================================
-BASE_DIR = r"C:\Users\hamda\Downloads"
+def _data_path(default):
+    """Return the directory given after --data_path on the command line, or the default."""
+    if "--data_path" in sys.argv:
+        i = sys.argv.index("--data_path")
+        if i + 1 >= len(sys.argv):
+            sys.exit("--data_path needs a directory")
+        path = sys.argv[i + 1]
+        del sys.argv[i:i + 2]
+        return path
+    return default
+
+# MSWC root containing audio/en/clips and splits/ (pass --data_path)
+BASE_DIR = _data_path("mswc")
 CLIPS_DIR = os.path.join(BASE_DIR, "audio", "en", "clips")
 TRAIN_CSV = os.path.join(BASE_DIR, "splits", "en_train.csv")
 TEST_CSV = os.path.join(BASE_DIR, "splits", "en_test.csv")
@@ -651,9 +663,9 @@ def run_train():
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage:")
-        print("  python kwt2_v2.py --precompute   (extract 40-bin log-mel features)")
-        print("  python kwt2_v2.py --train         (train both experiments)")
-        print("  python kwt2_v2.py --all            (both steps)")
+        print("  python kwt2_v2.py --data_path /path/to/mswc --precompute   (extract 40-bin log-mel features)")
+        print("  python kwt2_v2.py --data_path /path/to/mswc --train         (train both experiments)")
+        print("  python kwt2_v2.py --data_path /path/to/mswc --all            (both steps)")
         sys.exit(1)
 
     mode = sys.argv[1]

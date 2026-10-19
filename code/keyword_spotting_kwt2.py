@@ -18,6 +18,7 @@ Usage:
 """
 
 import os
+import sys
 import csv
 import json
 import math
@@ -40,7 +41,19 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 
 # config
-MICROSET_PATH = os.path.expanduser("~/Downloads/mswc_microset/en")
+def _data_path(default):
+    """Return the directory given after --data_path on the command line, or the default."""
+    if "--data_path" in sys.argv:
+        i = sys.argv.index("--data_path")
+        if i + 1 >= len(sys.argv):
+            sys.exit("--data_path needs a directory")
+        path = sys.argv[i + 1]
+        del sys.argv[i:i + 2]
+        return path
+    return default
+
+# 31-class microset folder containing clips/, en_train.csv, en_test.csv (pass --data_path)
+MICROSET_PATH = _data_path("mswc_microset/en")
 CLIPS_DIR = os.path.join(MICROSET_PATH, "clips")
 TRAIN_CSV = os.path.join(MICROSET_PATH, "en_train.csv")
 TEST_CSV = os.path.join(MICROSET_PATH, "en_test.csv")

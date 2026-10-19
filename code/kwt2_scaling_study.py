@@ -7,9 +7,9 @@ Runs two experiments:
   Experiment C: 6,210 keywords (100+ samples) x 200 samples
 
 Usage:
-    python kwt2_scaling_study.py --precompute   (step 1: extract MFCCs, ~70 min)
-    python kwt2_scaling_study.py --train        (step 2: train both scales, ~25 min)
-    python kwt2_scaling_study.py --all          (both steps sequentially)
+    python kwt2_scaling_study.py --data_path /path/to/mswc --precompute   (step 1: extract MFCCs, ~70 min)
+    python kwt2_scaling_study.py --data_path /path/to/mswc --train        (step 2: train both scales, ~25 min)
+    python kwt2_scaling_study.py --data_path /path/to/mswc --all          (both steps sequentially)
 """
 
 import os
@@ -38,7 +38,19 @@ from torch.utils.data import Dataset, DataLoader, TensorDataset
 # =====================================================
 # PATHS
 # =====================================================
-BASE_DIR = r"C:\Users\hamda\Downloads"
+def _data_path(default):
+    """Return the directory given after --data_path on the command line, or the default."""
+    if "--data_path" in sys.argv:
+        i = sys.argv.index("--data_path")
+        if i + 1 >= len(sys.argv):
+            sys.exit("--data_path needs a directory")
+        path = sys.argv[i + 1]
+        del sys.argv[i:i + 2]
+        return path
+    return default
+
+# MSWC root containing audio/en/clips and splits/ (pass --data_path)
+BASE_DIR = _data_path("mswc")
 CLIPS_DIR = os.path.join(BASE_DIR, "audio", "en", "clips")
 TRAIN_CSV = os.path.join(BASE_DIR, "splits", "en_train.csv")
 TEST_CSV = os.path.join(BASE_DIR, "splits", "en_test.csv")
@@ -512,9 +524,9 @@ def run_train():
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage:")
-        print("  python kwt2_scaling_study.py --precompute   (extract MFCCs, ~70 min)")
-        print("  python kwt2_scaling_study.py --train        (train both experiments, ~25 min)")
-        print("  python kwt2_scaling_study.py --all          (both steps)")
+        print("  python kwt2_scaling_study.py --data_path /path/to/mswc --precompute   (extract MFCCs, ~70 min)")
+        print("  python kwt2_scaling_study.py --data_path /path/to/mswc --train        (train both experiments, ~25 min)")
+        print("  python kwt2_scaling_study.py --data_path /path/to/mswc --all          (both steps)")
         sys.exit(1)
 
     mode = sys.argv[1]

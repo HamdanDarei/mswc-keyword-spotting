@@ -17,6 +17,7 @@ Run in Google Colab after downloading and extracting MSWC English.
 # =====================================================
 
 import os
+import sys
 import csv
 import json
 import time
@@ -43,9 +44,22 @@ print(f"CUDA available: {torch.cuda.is_available()}")
 # PATHS — adjust based on extraction structure
 # =====================================================
 # After extracting mswc.tar.gz and then audio/en.tar.gz + splits/en.tar.gz
-CLIPS_DIR = "/content/mswc/audio/en/clips"
-TRAIN_CSV = "/content/mswc/splits/en_train.csv"
-TEST_CSV = "/content/mswc/splits/en_test.csv"
+def _data_path(default):
+    """Return the directory given after --data_path on the command line, or the default."""
+    if "--data_path" in sys.argv:
+        i = sys.argv.index("--data_path")
+        if i + 1 >= len(sys.argv):
+            sys.exit("--data_path needs a directory")
+        path = sys.argv[i + 1]
+        del sys.argv[i:i + 2]
+        return path
+    return default
+
+# MSWC root containing audio/en/clips and splits/ (pass --data_path)
+BASE_DIR = _data_path("mswc")
+CLIPS_DIR = os.path.join(BASE_DIR, "audio", "en", "clips")
+TRAIN_CSV = os.path.join(BASE_DIR, "splits", "en_train.csv")
+TEST_CSV = os.path.join(BASE_DIR, "splits", "en_test.csv")
 
 CONFIG = {
     'sample_rate': 16000,
@@ -470,9 +484,9 @@ def main():
         'epochs': CONFIG['epochs'],
     }
 
-    with open('/content/ast_results.json', 'w') as f:
+    with open('ast_results.json', 'w') as f:
         json.dump(all_results, f, indent=2)
-    print(f"\nResults saved to /content/ast_results.json")
+    print("\nResults saved to ast_results.json")
     print("Done!")
 
 
