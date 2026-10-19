@@ -27,7 +27,7 @@ tar -xzf splits/en.tar.gz -C mswc/splits/
 rm -f audio/en.tar.gz splits/en.tar.gz
 ```
 
-Set the data path via command-line arguments (no hardcoded paths).
+Every script that reads local audio takes `--data_path`. For the full dataset, point it at the `mswc` folder created above (it contains `audio/en/clips` and `splits/`). For the 31-class microset, point it at the folder containing `clips/`, `en_train.csv`, and `en_test.csv`. If `--data_path` is omitted, the scripts look for `mswc/` and `mswc_microset/en/` in the current directory.
 
 ## Project Structure
 
@@ -47,11 +47,16 @@ code/
 ```bash
 python code/keyword_spotting_kwt2.py --data_path /path/to/mswc_microset/en
 python code/xgboost_rf_baselines.py --data_path /path/to/mswc_microset/en
-python code/keyword_spotting_cnn_baselines.py --data_path /path/to/mswc_microset/en
+python code/keyword_spotting_cnn_baselines.py   # streams MSWC from Hugging Face, no local path needed
 ```
 
 ### Scaling Study (1,000 and 6,210 classes, requires GPU)
 ```bash
+# v1 (13-bin MFCC)
+python code/kwt2_scaling_study.py --data_path /path/to/mswc --precompute
+python code/kwt2_scaling_study.py --data_path /path/to/mswc --train
+
+# v2 (corrected architecture)
 python code/kwt2_v2.py --data_path /path/to/mswc --precompute
 python code/kwt2_v2.py --data_path /path/to/mswc --train
 ```
